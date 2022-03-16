@@ -28,6 +28,7 @@ import com.example.ujchatapp.Activity.EditName;
 import com.example.ujchatapp.Constants.AllConstants;
 import com.example.ujchatapp.Permissions.Permissions;
 import com.example.ujchatapp.R;
+import com.example.ujchatapp.Utils.SharedPrefManager;
 import com.example.ujchatapp.Utils.Util;
 import com.example.ujchatapp.UserModel;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -86,7 +87,6 @@ public class ProfileFragment extends Fragment {
         permissions = new Permissions();
 
         getUser();
-
 
 
         pickProfileImg.setOnClickListener(new View.OnClickListener() {
@@ -174,7 +174,7 @@ public class ProfileFragment extends Fragment {
                         fName.setText(name);
                         lName.setText("");
                     }
-                    sharedPreferences.putString("username", name).apply();
+                    SharedPrefManager.getInstance(getContext()).setName(name);
 
                 }
                 break;
@@ -227,6 +227,8 @@ public class ProfileFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     UserModel userModel = dataSnapshot.getValue(UserModel.class);
                     user = userModel;
+
+                    SharedPrefManager.getInstance(getContext()).setName(user.getName());
 
                     statusTv.setText(user.getStatus());
 

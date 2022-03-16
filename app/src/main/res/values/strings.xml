@@ -28,4 +28,36 @@
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>
     <string name="user_name">Username</string>
+    <string name="create">Create</string>
+    <string name="group_image">Group Image</string>
+    <string name="hint_title">Title</string>
+    <string name="hint_section">Section</string>
+    <string name="hint_course_code">Course Code</string>
+    <string name="hint_instructor">Intstructor</string>
+    <string name="missing_fields_message">All fields are required!</string>
+
+
+    <!--    ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss-->
+
+    <string name="join_us_now">Join us now</string>
+    <string name="login_title">Login</string>
+    <string name="join_our_community">Join Our Secured Community</string>
+    <string name="hint_name">Enter Your Name</string>
+    <string name="hint_email">Enter Your Email</string>
+    <string name="signup">Sign up</string>
+    <string name="first_step">First Step :</string>
+    <string name="first_step_txt">a code has been sent to your registered phone number \n for verification purposes</string>
+    <string name="enter_the_code_below">Enter the code below and Don\'t share it</string>
+    <string name="next">Next</string>
+    <string name="second_step">Second step :</string>
+    <string name="second_step_txt">a code has been sent to your registered to your UJ email address \n for verification purposes</string>
+    <string name="please_wait">please wait , we are verifying your identity</string>
+    <string name="enjoy_your_chatting">Enjoy your chatting</string>
+    <string name="you_are_secured">You Are Secured</string>
+    <string name="hint_id">Enter Your ID</string>
+    <string name="app_name_intro">UJ secure chatting</string>
+    <string name="hint_password">Enter Password</string>
+    <string name="forget_pass">Forget your password ?</string>
+    <string name="reset_now">Reset Now</string>
+    <string name="question_dont_have_acc">Don\'t have an account ?</string>
 </resources>

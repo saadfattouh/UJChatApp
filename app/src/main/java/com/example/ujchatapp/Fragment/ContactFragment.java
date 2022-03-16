@@ -69,59 +69,61 @@ public class ContactFragment extends Fragment implements SearchView.OnQueryTextL
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         userPhoneNumber = firebaseAuth.getCurrentUser().getDisplayName();
 
-        getUserContacts();
+//        getUserContacts();
+        getAppContacts();
 
         contactsSearchView.setOnQueryTextListener(this);
         return view;
     }
 
 
-    private void getUserContacts() {
+//    private void getUserContacts() {
+//
+//
+//        if (permissions.isContactOk(getContext())) {
+//            userContacts = new ArrayList<>();
+//            String[] projection = new String[]{
+//                    ContactsContract.Contacts.DISPLAY_NAME,
+//                    ContactsContract.CommonDataKinds.Phone.NUMBER
+//            };
+//            ContentResolver cr = getContext().getContentResolver();
+//            Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection, null, null, null);
+//            if (cursor != null) {
+//                userContacts.clear();
+//                try {
+//
+//
+//                    while (cursor.moveToNext()) {
+//
+//                        String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+//                        String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+//
+//                        number = number.replaceAll("\\s", "");
+//                        String num = String.valueOf(number.charAt(0));
+//
+//                        if (num.equals("0"))
+//                            number = number.replaceFirst("(?:0)+", "+92");
+//
+//                        UserModel userModel = new UserModel();
+//                        userModel.setName(name);
+//                        userModel.setNumber(number);
+//                        userContacts.add(userModel);
+//
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//
+//            cursor.close();
+//            getAppContacts(userContacts);
+//
+//        } else permissions.requestContact(getActivity());
+//    }
 
-
-        if (permissions.isContactOk(getContext())) {
-            userContacts = new ArrayList<>();
-            String[] projection = new String[]{
-                    ContactsContract.Contacts.DISPLAY_NAME,
-                    ContactsContract.CommonDataKinds.Phone.NUMBER
-            };
-            ContentResolver cr = getContext().getContentResolver();
-            Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection, null, null, null);
-            if (cursor != null) {
-                userContacts.clear();
-                try {
-
-
-                    while (cursor.moveToNext()) {
-
-                        String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                        String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-
-                        number = number.replaceAll("\\s", "");
-                        String num = String.valueOf(number.charAt(0));
-
-                        if (num.equals("0"))
-                            number = number.replaceFirst("(?:0)+", "+92");
-
-                        UserModel userModel = new UserModel();
-                        userModel.setName(name);
-                        userModel.setNumber(number);
-                        userContacts.add(userModel);
-
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            cursor.close();
-            getAppContacts(userContacts);
-
-        } else permissions.requestContact(getActivity());
-    }
-
-    private void getAppContacts(final ArrayList<UserModel> mobileContacts) {
+    //todo if we want to display only users in my faculty I have to pass the facultyId into this function
+    private void getAppContacts() {
 
         appContacts = new ArrayList<>();
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
@@ -135,9 +137,9 @@ public class ContactFragment extends Fragment implements SearchView.OnQueryTextL
                     for (DataSnapshot ds : dataSnapshot.getChildren()) {
                         String number = ds.child("number").getValue().toString();
 
-                        for (UserModel userModel : mobileContacts) {
-
-                            if (userModel.getNumber().equals(number) && !number.equals(userPhoneNumber)) {
+//                        for (UserModel userModel : mobileContacts) {
+//
+//                            if (userModel.getNumber().equals(number) && !number.equals(userPhoneNumber)) {
 
                                 String image = ds.child("image").getValue().toString();
                                 String status = ds.child("status").getValue().toString();
@@ -150,11 +152,12 @@ public class ContactFragment extends Fragment implements SearchView.OnQueryTextL
                                 registeredUser.setStatus(status);
                                 registeredUser.setImage(image);
                                 registeredUser.setuID(uID);
-
-                                appContacts.add(registeredUser);
-                                break;
-                            }
-                        }
+                                if(uID.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                                    continue;
+                                }else
+                                    appContacts.add(registeredUser);
+//                            }
+//                        }
                     }
                     contactAdapter = new ContactAdapter(getContext(), appContacts);
                     mContactsList.setAdapter(contactAdapter);
@@ -171,17 +174,17 @@ public class ContactFragment extends Fragment implements SearchView.OnQueryTextL
 
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case AllConstants.CONTACTS_REQUEST_CODE:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getUserContacts();
-                } else
-                    Toast.makeText(getContext(), "Contact Permission denied", Toast.LENGTH_SHORT).show();
-        }
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        switch (requestCode) {
+//            case AllConstants.CONTACTS_REQUEST_CODE:
+//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    getUserContacts();
+//                } else
+//                    Toast.makeText(getContext(), "Contact Permission denied", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
 
     @Override

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp">
+        android:layout_margin="8dp">
 
 
         <androidx.cardview.widget.CardView
@@ -17,28 +17,34 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginStart="24dp"
-            android:layout_marginBottom="10dp"
-            app:cardBackgroundColor="@color/cardBackground"
             app:cardCornerRadius="10dp"
             app:cardElevation="10dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="16dp">
+                android:layout_margin="8dp">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/imgContact"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_margin="8dp"
+                    android:elevation="10dp"
+                    android:src="@drawable/ic_info" />
 
                 <TextView
                     android:id="@+id/txtContactName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
-                    android:layout_marginStart="40dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toEndOf="@id/imgContact"
                     android:text="Nothing"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="15dp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -50,13 +56,13 @@
                     android:layout_marginTop="8dp"
                     android:text="Nothing"
                     android:textColor="@color/textColor"
-                    android:textSize="13dp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:id="@+id/imgContactUserInfo"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerInParent="true"
                     android:layout_marginEnd="10dp"
@@ -64,14 +70,6 @@
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/imgContact"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_alignTop="@id/container"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="13dp"
-            android:elevation="10dp" />
+
     </RelativeLayout>
 </layout>

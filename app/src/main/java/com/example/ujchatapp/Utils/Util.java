@@ -32,8 +32,17 @@ public class Util {
         return sdf().format(calendar.getTimeInMillis());
     }
 
+    public String currentTime(){
+        Calendar calendar = Calendar.getInstance();
+        return sdfTime().format(calendar.getTimeInMillis());
+    }
+
     public static SimpleDateFormat sdf() {
         return new SimpleDateFormat("yyyy-MM-dd hh-mm-ss a", Locale.US);
+    }
+
+    public static SimpleDateFormat sdfTime() {
+        return new SimpleDateFormat("hh:mm", Locale.US);
     }
 
     public void hideKeyBoard(Activity activity) {

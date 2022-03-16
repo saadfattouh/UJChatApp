@@ -21,6 +21,8 @@ import com.example.ujchatapp.Activity.DashBoard;
 import com.example.ujchatapp.Constants.AllConstants;
 import com.example.ujchatapp.Permissions.Permissions;
 import com.example.ujchatapp.R;
+import com.example.ujchatapp.UserModel;
+import com.example.ujchatapp.Utils.SharedPrefManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -47,11 +49,11 @@ public class CompleteUserData extends Fragment {
     CircleImageView profileImage;
     ImageView selectNewImageBtn;
     Button doneBtn;
-    EditText nameEt, statusEt;
+    EditText nameEt, statusEt, profileEt, emailEt, studentIdEt;
 
 
 
-    private String storagePath, name, status;
+    private String storagePath, name, status, email, profileName, studentID;
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
@@ -59,6 +61,8 @@ public class CompleteUserData extends Fragment {
 
     private Permissions permissions;
     private SharedPreferences sharedPreferences;
+
+    UserModel user;
 
 
 
@@ -79,6 +83,12 @@ public class CompleteUserData extends Fragment {
         doneBtn = view.findViewById(R.id.btnDataDone);
         nameEt = view.findViewById(R.id.edtUserName);
         statusEt = view.findViewById(R.id.edtUserStatus);
+        profileEt = view.findViewById(R.id.edtUserProfileName);
+        emailEt = view.findViewById(R.id.edtUserEmail);
+        studentIdEt = view.findViewById(R.id.edtUserStudentId);
+
+        user = (UserModel) getArguments().getSerializable("user");
+
 
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
@@ -103,7 +113,7 @@ public class CompleteUserData extends Fragment {
         doneBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkStatus() & checkImage() & checkName())
+                if (checkStatus() & checkImage() & checkName() & checkEmail() & checkProfileName() & checkStudentID())
                     uploadData();
             }
         });
@@ -127,6 +137,16 @@ public class CompleteUserData extends Fragment {
                         map.put("name", name);
                         map.put("status", status);
                         map.put("image", url);
+                        map.put("studentID", studentID);
+                        map.put("email", email);
+                        map.put("profileName", profileName);
+                        map.put("token", user.getToken());
+                        map.put("uID", user.getuID());
+                        map.put("typing", user.getTyping());
+                        map.put("number", user.getNumber());
+                        map.put("online", user.getOnline());
+                        map.put("type", user.getType());
+                        SharedPrefManager.getInstance(getContext()).setName(name);
                         databaseReference.child(firebaseAuth.getUid()).updateChildren(map).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -209,6 +229,39 @@ public class CompleteUserData extends Fragment {
             return true;
         }
     }
+
+    private boolean checkProfileName() {
+        profileName = profileEt.getText().toString();
+        if (profileName.isEmpty()) {
+            profileEt.setError("Filed is required");
+            return false;
+        } else {
+            profileEt.setError(null);
+            return true;
+        }
+    }
+    private boolean checkEmail() {
+        email = emailEt.getText().toString();
+        if (email.isEmpty()) {
+            emailEt.setError("Filed is required");
+            return false;
+        } else {
+            emailEt.setError(null);
+            return true;
+        }
+    }
+
+    private boolean checkStudentID() {
+        studentID = studentIdEt.getText().toString();
+        if (studentID.isEmpty()) {
+            studentIdEt.setError("Filed is required");
+            return false;
+        } else {
+            studentIdEt.setError(null);
+            return true;
+        }
+    }
+
 
     private boolean checkImage() {
         if (imageUri == null) {

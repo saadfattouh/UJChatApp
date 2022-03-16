@@ -11,6 +11,9 @@ public interface AllConstants {
     String CHANNEL_ID = "1000";
     int NOTIFICATION_ID = 100;
 
+    int USER_TYPE_STUDENT = 0;
+    int USER_TYPE_INSTRUCTOR = 1;
+
     String NOTIFICATION_URL = "https://fcm.googleapis.com/fcm/send";
     String SERVER_KEY = "AAAApFehDUk:APA91bGNxMHslZsMLBQhfkIstegapDflh0czl7p_uLQD7dVnHqgq6hlWpKHjH1Eajr7vtRU0_2pjLzr_gL6ageC3twrkejOB1PzDpJdYPwPFCfvzG5CyIJ8CBjyE_yqjpJAhN9ZAMR6q";
     String UID = "FoRpUQwjvRZJYfEjVhm6iCbxTUg1";

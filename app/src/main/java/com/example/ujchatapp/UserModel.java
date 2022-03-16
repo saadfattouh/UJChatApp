@@ -6,16 +6,19 @@ import androidx.databinding.BindingAdapter;
 
 import com.bumptech.glide.Glide;
 
+import java.io.Serializable;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class UserModel {
+public class UserModel implements Serializable {
 
-    String name, status, image, number, uID, online, typing, token;
+    String name, status, image, number, uID, online, typing, token, email, profileName, studentID, major, department;
+    int type;
 
     public UserModel() {
     }
 
-    public UserModel(String name, String status, String image, String number, String uID, String online, String typing, String token) {
+    public UserModel(String name, String status, String image, String number, String uID, String online, String typing, String token, String email, String profileName, String studentID, String major, String department, int type) {
         this.name = name;
         this.status = status;
         this.image = image;
@@ -24,6 +27,60 @@ public class UserModel {
         this.online = online;
         this.typing = typing;
         this.token = token;
+        this.email = email;
+        this.profileName = profileName;
+        this.studentID = studentID;
+        this.major = major;
+        this.department = department;
+        this.type = type;
+    }
+
+    public String getStudentID() {
+        return studentID;
+    }
+
+    public void setStudentID(String studentID) {
+        this.studentID = studentID;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getToken() {

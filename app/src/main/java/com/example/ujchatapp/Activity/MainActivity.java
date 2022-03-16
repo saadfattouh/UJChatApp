@@ -22,5 +22,8 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction ft = fm.beginTransaction();
         Fragment fragment = new GetNumber();
         ft.add(R.id.container, fragment).commit();
+
+
+
     }
 }

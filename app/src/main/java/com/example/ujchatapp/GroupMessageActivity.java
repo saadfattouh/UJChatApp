@@ -1,5 +1,12 @@
 package com.example.ujchatapp;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.animation.Animator;
 import android.app.Activity;
 import android.content.Intent;
@@ -20,29 +27,22 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.devlomi.record_view.OnRecordListener;
+import com.example.ujchatapp.Activity.GroupInfo;
 import com.example.ujchatapp.Activity.UserInfo;
 import com.example.ujchatapp.Constants.AllConstants;
 import com.example.ujchatapp.Permissions.Permissions;
+import com.example.ujchatapp.Utils.SharedPrefManager;
 import com.example.ujchatapp.Utils.Util;
+import com.example.ujchatapp.databinding.ActivityGroupMessageBinding;
 import com.example.ujchatapp.databinding.ActivityMessageBinding;
+import com.example.ujchatapp.databinding.LeftAudioGroupLayoutBinding;
 import com.example.ujchatapp.databinding.LeftAudioItemLayoutBinding;
+import com.example.ujchatapp.databinding.LeftGroupLayoutBinding;
 import com.example.ujchatapp.databinding.LeftItemLayoutBinding;
+import com.example.ujchatapp.databinding.RightAudioGroupLayoutBinding;
 import com.example.ujchatapp.databinding.RightAudioItemLayoutBinding;
+import com.example.ujchatapp.databinding.RightGroupLayoutBinding;
 import com.example.ujchatapp.databinding.RightItemLayoutBinding;
 import com.example.ujchatapp.services.SendMediaService;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -51,44 +51,39 @@ import com.fxn.pix.Options;
 import com.fxn.pix.Pix;
 import com.fxn.utility.PermUtil;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import me.jagar.chatvoiceplayerlibrary.VoicePlayerView;
 
-public class MessageActivity extends AppCompatActivity {
+public class GroupMessageActivity extends AppCompatActivity {
 
-    private ActivityMessageBinding binding;
-    private String hisID, hisImage, myID, chatID = null, myImage, myName, audioPath;
+    private ActivityGroupMessageBinding binding;
+    private String groupImage, myID, chatID = null, myImage, myName, audioPath;
     private Util util;
     private DatabaseReference databaseReference;
-    private FirebaseRecyclerAdapter<MessageModel, ViewHolder> firebaseRecyclerAdapter;
+    private FirebaseRecyclerAdapter<GroupMessageModel, GroupMessageActivity.ViewHolder> firebaseRecyclerAdapter;
     private SharedPreferences sharedPreferences;
     private Permissions permissions;
     private MediaRecorder mediaRecorder;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.inflate(LayoutInflater.from(this), R.layout.activity_message, null, false);
+        binding = DataBindingUtil.inflate(LayoutInflater.from(this), R.layout.activity_group_message, null, false);
         setContentView(binding.getRoot());
+
         sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
         myImage = sharedPreferences.getString("userImage", "");
         myName = sharedPreferences.getString("username", "");
@@ -96,37 +91,28 @@ public class MessageActivity extends AppCompatActivity {
         myID = util.getUID();
         permissions = new Permissions();
 
-        if (getIntent().hasExtra("chatID")) {
-            chatID = getIntent().getStringExtra("chatID");
-            hisID = getIntent().getStringExtra("hisID");
-            hisImage = getIntent().getStringExtra("hisImage");
-
-            Log.d("message", "onCreate: hisID" + hisID + "\n myID" + myID);
-
+        if (getIntent().hasExtra("chat_id")) {
+            chatID = getIntent().getStringExtra("chat_id");
+            groupImage = getIntent().getStringExtra("group_image");
             readMessages(chatID);
-        } else {
-            hisID = getIntent().getStringExtra("hisID");
-            hisImage = getIntent().getStringExtra("hisImage");
         }
 
-        if (chatID == null)
-            checkChat(hisID);
 
-        binding.setImage(hisImage);
+        binding.setImage(groupImage);
         binding.setActivity(this);
 
         binding.btnSend.setOnClickListener(v -> {
 
             String message = binding.msgText.getText().toString().trim();
             if (message.isEmpty()) {
-                Toast.makeText(MessageActivity.this, "Enter Message...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(GroupMessageActivity.this, "Enter Message...", Toast.LENGTH_SHORT).show();
             } else {
                 sendMessage(message);
-                getToken(message, hisID, myImage, chatID);
+//                getToken(message, hisID, myImage, chatID);
             }
 
             binding.msgText.setText("");
-            util.hideKeyBoard(MessageActivity.this);
+            util.hideKeyBoard(GroupMessageActivity.this);
         });
 
         binding.msgText.addTextChangedListener(new TextWatcher() {
@@ -139,12 +125,10 @@ public class MessageActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() == 0) {
 
-                    updateTypingStatus("false");
                     binding.btnSend.setVisibility(View.GONE);
                     binding.recordButton.setVisibility(View.VISIBLE);
 
                 } else {
-                    updateTypingStatus(hisID);
                     binding.recordButton.setVisibility(View.GONE);
                     binding.btnSend.setVisibility(View.VISIBLE);
 
@@ -169,8 +153,6 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        checkStatus(hisID);
-
 //        binding.imgGallery.setOnClickListener(view -> {
 //            getGalleryImage();
 //        });
@@ -179,96 +161,44 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    private void checkChat(final String hisID) {
-        databaseReference = FirebaseDatabase.getInstance().getReference("ChatList").child(myID);
-        Query query = databaseReference.orderByChild("member").equalTo(hisID);
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChildren()) {
-                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                        String id = ds.child("member").getValue().toString();
-                        if (id.equals(hisID)) {
-                            chatID = ds.getKey();
-                            readMessages(chatID);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void createChat(String msg) {
-        databaseReference = FirebaseDatabase.getInstance().getReference("ChatList").child(myID);
-        chatID = databaseReference.push().getKey();
-
-        ChatListModel chatListModel = new ChatListModel(chatID, util.currentData(), msg, hisID);
-        databaseReference.child(chatID).setValue(chatListModel);
-
-        databaseReference = FirebaseDatabase.getInstance().getReference("ChatList").child(hisID);
-
-        ChatListModel chatList = new ChatListModel(chatID, util.currentData(), msg, myID);
-        databaseReference.child(chatID).setValue(chatList);
-
-        databaseReference = FirebaseDatabase.getInstance().getReference("Chat").child(chatID);
-        MessageModel messageModel = new MessageModel(myID, hisID, msg, util.currentData(), "text");
-        databaseReference.push().setValue(messageModel);
-
-
-    }
 
     private void sendMessage(String msg) {
-        if (chatID == null) {
-            createChat(msg);
 
-        } else {
-            String date = util.currentData();
-            MessageModel messageModel = new MessageModel(myID, hisID, msg, date, "text");
-            databaseReference = FirebaseDatabase.getInstance().getReference("Chat").child(chatID);
-            databaseReference.push().setValue(messageModel);
+        String date = util.currentData();
+        GroupMessageModel messageModel = new GroupMessageModel(myID, msg, date, "text");
+        databaseReference = FirebaseDatabase.getInstance().getReference("Groups").child(chatID).child("messages");
+        databaseReference.push().setValue(messageModel);
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("lastMessage", msg);
-            map.put("date", date);
-            databaseReference = FirebaseDatabase.getInstance().getReference("ChatList").child(myID).child(chatID);
-            databaseReference.updateChildren(map);
-
-            databaseReference = FirebaseDatabase.getInstance().getReference("ChatList").child(hisID).child(chatID);
-            Map<String, Object> update = new HashMap<>();
-            update.put("lastMessage", msg);
-            update.put("date", date);
-            databaseReference.updateChildren(map);
-
-        }
+        databaseReference = FirebaseDatabase.getInstance().getReference("Groups").child(chatID).child("info");
+        HashMap<String, Object> last = new HashMap<>();
+        last.put("lastMessage", msg);
+        last.put("lastMessageSender", SharedPrefManager.getInstance(this).getName() +": ");
+        last.put("time", util.currentTime());
+        databaseReference.updateChildren(last);
     }
 
-    public void userInfo() {
-        Intent intent = new Intent(this, UserInfo.class);
-        intent.putExtra("userID", hisID);
+    public void groupInfo() {
+        Intent intent = new Intent(this, GroupInfo.class);
+        intent.putExtra("chat_id", chatID);
         startActivity(intent);
     }
 
     private void readMessages(String chatID) {
 
         Query query = FirebaseDatabase
-                .getInstance().getReference().child("Chat")
-                .child(chatID);
-        FirebaseRecyclerOptions<MessageModel> options = new FirebaseRecyclerOptions.Builder<MessageModel>()
-                .setQuery(query, MessageModel.class).build();
+                .getInstance().getReference("Groups")
+                .child(chatID).child("messages");
+        FirebaseRecyclerOptions<GroupMessageModel> options = new FirebaseRecyclerOptions.Builder<GroupMessageModel>()
+                .setQuery(query, GroupMessageModel.class).build();
         query.keepSynced(true);
 
 
-        firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<MessageModel, ViewHolder>(options) {
+        firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<GroupMessageModel, GroupMessageActivity.ViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull ViewHolder viewHolder, int position, @NonNull MessageModel messageModel) {
+            protected void onBindViewHolder(@NonNull ViewHolder viewHolder, int position, @NonNull GroupMessageModel messageModel) {
                 switch (getItemViewType(position)) {
                     case 0:
+
                         viewHolder.viewDataBinding.setVariable(BR.messageImage, myImage);
                         viewHolder.viewDataBinding.setVariable(BR.message, messageModel);
                         break;
@@ -278,11 +208,11 @@ public class MessageActivity extends AppCompatActivity {
                         viewHolder.voicePlayerView.setAudio(messageModel.getMessage());
                         break;
                     case 1:
-                        viewHolder.viewDataBinding.setVariable(BR.messageImage, hisImage);
+                        viewHolder.viewDataBinding.setVariable(BR.messageImage, null);
                         viewHolder.viewDataBinding.setVariable(BR.message, messageModel);
                         break;
                     case 200:
-                        viewHolder.viewDataBinding.setVariable(BR.messageImage, hisImage);
+                        viewHolder.viewDataBinding.setVariable(BR.messageImage, null);
                         viewHolder.voicePlayerView.setAudio(messageModel.getMessage());
 
                         break;
@@ -297,20 +227,20 @@ public class MessageActivity extends AppCompatActivity {
                 ViewDataBinding viewDataBinding = null;
                 switch (viewType) {
                     case 0:
-                        viewDataBinding = RightItemLayoutBinding.inflate(
+                        viewDataBinding = RightGroupLayoutBinding.inflate(
                                 LayoutInflater.from(getBaseContext()), parent, false);
                         break;
                     case 100:
-                        viewDataBinding = RightAudioItemLayoutBinding.inflate(
+                        viewDataBinding = RightAudioGroupLayoutBinding.inflate(
                                 LayoutInflater.from(parent.getContext()), parent, false);
                         break;
                     case 1:
-                        viewDataBinding = LeftItemLayoutBinding.inflate(
+                        viewDataBinding = LeftGroupLayoutBinding.inflate(
                                 LayoutInflater.from(getBaseContext()), parent, false);
                         break;
                     case 200:
 
-                        viewDataBinding = LeftAudioItemLayoutBinding.inflate(
+                        viewDataBinding = LeftAudioGroupLayoutBinding.inflate(
                                 LayoutInflater.from(parent.getContext()), parent, false);
                         break;
                 }
@@ -320,7 +250,7 @@ public class MessageActivity extends AppCompatActivity {
 
             @Override
             public int getItemViewType(int position) {
-                MessageModel messageModel = getItem(position);
+                GroupMessageModel messageModel = getItem(position);
                 if (myID.equals(messageModel.getSender())) {
 
                     if (messageModel.getType().equals("recording"))
@@ -352,129 +282,18 @@ public class MessageActivity extends AppCompatActivity {
             super(viewDataBinding.getRoot());
             this.viewDataBinding = viewDataBinding;
 
-            if (viewDataBinding instanceof RightAudioItemLayoutBinding) {
-                voicePlayerView = ((RightAudioItemLayoutBinding) viewDataBinding).voicePlayerView;
+            if (viewDataBinding instanceof RightAudioGroupLayoutBinding) {
+                voicePlayerView = ((RightAudioGroupLayoutBinding) viewDataBinding).voicePlayerView;
 
             }
 
-            if (viewDataBinding instanceof LeftAudioItemLayoutBinding) {
-                voicePlayerView = ((LeftAudioItemLayoutBinding) viewDataBinding).voicePlayerView;
+            if (viewDataBinding instanceof LeftAudioGroupLayoutBinding) {
+                voicePlayerView = ((LeftAudioGroupLayoutBinding) viewDataBinding).voicePlayerView;
             }
 
         }
     }
 
-    private void checkStatus(String hisID) {
-
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(hisID);
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String online = Objects.requireNonNull(dataSnapshot.child("online").getValue()).toString();
-                    String typing = Objects.requireNonNull(dataSnapshot.child("typing").getValue()).toString();
-                    binding.setStatus(online);
-                    if (typing.equals(myID)) {
-                        binding.typingStatus.setVisibility(View.VISIBLE);
-                        binding.typingStatus.playAnimation();
-                    } else {
-                        binding.typingStatus.cancelAnimation();
-                        binding.typingStatus.setVisibility(View.INVISIBLE);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    @Override
-    protected void onResume() {
-        util.updateOnlineStatus("online");
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        util.updateOnlineStatus(String.valueOf(System.currentTimeMillis()));
-        updateTypingStatus("false");
-        super.onPause();
-    }
-
-    private void updateTypingStatus(String status) {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(myID);
-        Map<String, Object> map = new HashMap<>();
-        map.put("typing", status);
-        databaseReference.updateChildren(map);
-    }
-
-    private void getToken(String message, String hisID, String myImage, String chatID) {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("Users").child(hisID);
-        database.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String token = snapshot.child("token").getValue().toString();
-
-
-                JSONObject to = new JSONObject();
-                JSONObject data = new JSONObject();
-                try {
-                    data.put("title", myName);
-                    data.put("message", message);
-                    data.put("hisID", myID);
-                    data.put("hisImage", myImage);
-                    data.put("chatID", chatID);
-
-
-                    to.put("to", token);
-                    to.put("data", data);
-
-                    sendNotification(to);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private void sendNotification(JSONObject to) {
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, AllConstants.NOTIFICATION_URL, to, response -> {
-            Log.d("notification", "sendNotification: " + response);
-        }, error -> {
-            Log.d("notification", "sendNotification: " + error);
-        }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-
-                Map<String, String> map = new HashMap<>();
-                map.put("Authorization", "key=" + AllConstants.SERVER_KEY);
-                map.put("Content-Type", "application/json");
-                return map;
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/json";
-            }
-        };
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        request.setRetryPolicy(new DefaultRetryPolicy(30000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        requestQueue.add(request);
-    }
 
     private void showLayout() {
         RelativeLayout view = binding.dataLayout;
@@ -536,8 +355,7 @@ public class MessageActivity extends AppCompatActivity {
                     Toast.makeText(this, "Send simple message first", Toast.LENGTH_SHORT).show();
                 else {
 
-                    Intent intent = new Intent(MessageActivity.this, SendMediaService.class);
-                    intent.putExtra("hisID", hisID);
+                    Intent intent = new Intent(GroupMessageActivity.this, SendMediaService.class);
                     intent.putExtra("chatID", chatID);
                     intent.putStringArrayListExtra("media", selectedImages);
 
@@ -566,9 +384,9 @@ public class MessageActivity extends AppCompatActivity {
 
             case AllConstants.RECORDING_REQUEST_CODE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (this.permissions.isStorageOk(MessageActivity.this))
+                    if (this.permissions.isStorageOk(GroupMessageActivity.this))
                         binding.recordButton.setListenForRecord(true);
-                    else this.permissions.requestStorage(MessageActivity.this);
+                    else this.permissions.requestStorage(GroupMessageActivity.this);
 
                 } else
                     Toast.makeText(this, "Recording permission denied", Toast.LENGTH_SHORT).show();
@@ -606,11 +424,11 @@ public class MessageActivity extends AppCompatActivity {
 
         binding.recordButton.setOnClickListener(view -> {
 
-            if (permissions.isRecordingOk(MessageActivity.this))
-                if (permissions.isStorageOk(MessageActivity.this))
+            if (permissions.isRecordingOk(GroupMessageActivity.this))
+                if (permissions.isStorageOk(GroupMessageActivity.this))
                     binding.recordButton.setListenForRecord(true);
-                else permissions.requestStorage(MessageActivity.this);
-            else permissions.requestRecording(MessageActivity.this);
+                else permissions.requestStorage(GroupMessageActivity.this);
+            else permissions.requestRecording(GroupMessageActivity.this);
         });
 
         binding.recordView.setOnRecordListener(new OnRecordListener() {
@@ -685,9 +503,8 @@ public class MessageActivity extends AppCompatActivity {
 
 
 
-                //todo HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHere
                 binding.recordView.setVisibility(View.GONE);
-                binding.messageLayout.setVisibility(View.VISIBLE);
+                binding.recyclerViewMessage.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -723,10 +540,10 @@ public class MessageActivity extends AppCompatActivity {
 
                         String url = path.getResult().toString();
                         if (chatID == null) {
-                            createChat(url);
+                            Toast.makeText(this, "an error has occured, please try again later...", Toast.LENGTH_SHORT).show();
                         } else {
-                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Chat").child(chatID);
-                            MessageModel messageModel = new MessageModel(myID, hisID, url, util.currentData(), "recording");
+                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups").child(chatID).child("messages");
+                            GroupMessageModel messageModel = new GroupMessageModel(myID, url, util.currentData(), "recording");
                             databaseReference.push().setValue(messageModel);
                         }
                     }
@@ -734,6 +551,5 @@ public class MessageActivity extends AppCompatActivity {
             });
         }
     }
-
 
 }

@@ -6,11 +6,11 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".Fragment.GetNumber">
+        tools:context=".Fragment.CompleteUserData">
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="200dp"
             android:background="@color/colorPrimary">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -18,7 +18,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_launcher_background"
+                android:src="@drawable/ic_person"
                 app:civ_border_color="@color/colorAccent"
                 app:civ_border_width="2dp" />
 
@@ -26,8 +26,9 @@
                 android:id="@+id/imgPickImage"
                 android:layout_width="30dp"
                 android:layout_height="26dp"
-                android:layout_marginTop="150dp"
+                android:layout_marginTop="100dp"
                 android:src="@drawable/ic_camera"
+                android:tint="@color/colorAccent"
                 app:layout_anchor="@id/imgUser"
                 app:layout_anchorGravity="end|center" />
 
@@ -37,9 +38,9 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/card"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="250dp"
+            android:layout_marginTop="180dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="20dp">
 
@@ -49,13 +50,25 @@
                 android:layout_marginHorizontal="25dp"
                 android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/join_our_community"
+                    android:fontFamily="serif"
+                    android:textSize="18sp"
+                    android:textAlignment="center"
+                    android:textColor="@color/black"
+                    />
+
                 <EditText
                     android:id="@+id/edtUserName"
                     android:layout_width="match_parent"
                     android:layout_height="43dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="16dp"
                     android:background="@color/edittextColor"
-                    android:hint="Username"
+                    android:hint="Name"
                     android:inputType="text|textCapSentences"
                     android:padding="10dp"
                     android:textColor="@color/colorPrimary"
@@ -64,10 +77,56 @@
                     android:textStyle="bold" />
 
                 <EditText
+                    android:id="@+id/edtUserProfileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="43dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/edittextColor"
+                    android:hint="Profile name"
+                    android:inputType="text|textCapSentences"
+                    android:padding="10dp"
+                    android:textColor="@color/colorPrimary"
+                    android:textColorHint="@color/colorPrimary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edtUserStudentId"
+                    android:layout_width="match_parent"
+                    android:layout_height="43dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/edittextColor"
+                    android:hint="Student ID"
+                    android:inputType="text|textCapSentences"
+                    android:padding="10dp"
+                    android:textColor="@color/colorPrimary"
+                    android:textColorHint="@color/colorPrimary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edtUserEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="43dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/edittextColor"
+                    android:hint="Email"
+                    android:inputType="textEmailAddress"
+                    android:padding="10dp"
+                    android:textColor="@color/colorPrimary"
+                    android:textColorHint="@color/colorPrimary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+
+
+
+                <EditText
                     android:id="@+id/edtUserStatus"
                     android:layout_width="match_parent"
                     android:layout_height="43dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
                     android:background="@color/edittextColor"
                     android:inputType="text|textCapSentences"
                     android:padding="10dp"
@@ -85,11 +144,10 @@
             android:layout_below="@+id/card"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="30dp"
-            android:background="@drawable/button_background"
-            android:backgroundTint="@color/colorPrimary"
+            android:background="@color/colorPrimary"
             android:text="@string/done"
             android:textAllCaps="false"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
 

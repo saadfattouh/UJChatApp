@@ -14,6 +14,7 @@ import android.os.IBinder;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import com.example.ujchatapp.GroupMessageModel;
 import com.example.ujchatapp.MessageModel;
 import com.example.ujchatapp.R;
 import com.example.ujchatapp.Utils.Util;
@@ -50,7 +51,6 @@ public class SendMediaService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
 
         hisID = intent.getStringExtra("hisID");
         chatID = intent.getStringExtra("chatID");
@@ -108,13 +108,12 @@ public class SendMediaService extends Service {
 
     private String compressImage(String fileName) {
 
-        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "ChatMe/Media/");
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "UJChatApp/Media/");
         if (!file.exists())
             file.mkdirs();
 
         return SiliCompressor.with(this).compress(fileName, file, false);
     }
-
 
     private void uploadImage(String fileName) {
 
@@ -128,9 +127,16 @@ public class SendMediaService extends Service {
                     if (uri.isSuccessful()) {
                         String url = uri.getResult().toString();
 
-                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Chat").child(chatID);
-                        MessageModel messageModel = new MessageModel(util.getUID(), hisID, url, util.currentData(), "image");
-                        databaseReference.push().setValue(messageModel);
+                        if(hisID != null){
+                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Chat").child(chatID);
+                            MessageModel messageModel = new MessageModel(util.getUID(), hisID, url, util.currentData(), "image");
+                            databaseReference.push().setValue(messageModel);
+                        }else {
+                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Groups").child(chatID).child("messages");
+                            GroupMessageModel messageModel = new GroupMessageModel(util.getUID(), url, util.currentData(), "image");
+                            databaseReference.push().setValue(messageModel);
+                        }
+
                     }
                 });
             }
